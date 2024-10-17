@@ -50,5 +50,4 @@ tweetText = driver.find_element(By.XPATH,"//div[data-testid='tweetText']")
 like = driver.find_element(By.XPATH,"//div[data-testid='like']")
 reply = driver.find_element(By.XPATH,"//div[data-testid='reply']")
 resport = driver.find_element(By.XPATH,"//div[data-testid='retweet']")
-view = By.CLASS_NAME #TIM CACH LAY
 
