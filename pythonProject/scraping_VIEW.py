@@ -47,6 +47,8 @@ while count < 10:
         body.send_keys(Keys.ARROW_DOWN)
         time.sleep(0.000001)
     view_elements = driver.find_elements(By.XPATH, "//a[contains(@aria-label,'views')]")
+
+
     for view_element in view_elements:
         try:
             #Lay link  de dam bao khong bi trung lap
@@ -65,6 +67,7 @@ while count < 10:
                         break
         except Exception as e:
             print(f"Error: {e}")
+
     if count == 10:
         break
     #Kiểm tra chiều cao sau khi cuộn
