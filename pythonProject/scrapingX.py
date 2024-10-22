@@ -30,11 +30,11 @@ search.send_keys(idol)
 search.send_keys(Keys.ENTER)
 
 time.sleep(5)
-people = driver.find_element(By.XPATH,"//span[contains(text(),'People')]")
+people = driver.find_element(By.XPATH, "//span[contains(text(),'People')]")
 people.click()
 
 time.sleep(7)
-name_idol = driver.find_element(By.XPATH,"//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
+name_idol = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/main/div/div/div/div[1]/div/div[3]/section/div/div/div[1]/div/div/button/div/div[2]/div[1]/div[1]/div/div[1]/a/div/div[1]/span/span[1]")
 time.sleep(2)
 people = driver.find_element(By.XPATH, "//span[contains(text(),'People')]")
 people.click()
@@ -87,7 +87,7 @@ while True:
         resports.append(resport)
 
         try:
-            like = driver.find_element(By.XPATH,".//div[@data-testid='like']").text
+            like = driver.find_element(By.XPATH, ".//div[@data-testid='like']").text
         except:
             like = ''
         likes.append(like)
