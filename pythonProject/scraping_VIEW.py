@@ -41,7 +41,7 @@ body = driver.find_element(By.TAG_NAME, "body") # tim the body de cuộn trang
 count = 0
 last_height = driver.execute_script("return document.body.scrollHeight")
 view_posts = set() #Tao tệp lưu các post, tránh trufng lập
-while count < 10:
+while count < 20:
     #Cuon xuong cuoi trang
     for i in range(45):
         body.send_keys(Keys.ARROW_DOWN)
@@ -68,7 +68,7 @@ while count < 10:
         except Exception as e:
             print(f"Error: {e}")
 
-    if count == 10:
+    if count == 20:
         break
     #Kiểm tra chiều cao sau khi cuộn
     new_height = driver.execute_script("return document.body.scrollHeight")
