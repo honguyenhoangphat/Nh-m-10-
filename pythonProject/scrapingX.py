@@ -85,7 +85,7 @@ def scrape_tweets(driver):
     resports = []
     views = []
     tweetIMG=[]
-    tweet_comments = []
+    # tweet_comments = []
     articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
     while True:
         for article in articles:
@@ -141,8 +141,8 @@ def scrape_tweets(driver):
                 tweetIMG.append(tweetIMGs)
 
                 # Lấy bình luận cho tweet này
-                comments = scrape_comments(article)
-                tweet_comments.append(comments)
+                # comments = scrape_comments(article)
+                # tweet_comments.append(comments)
         #Cuộn chậm
         driver.execute_script("window.scrollBy(0,1000);")
         time.sleep(3)
@@ -156,11 +156,11 @@ def scrape_tweets(driver):
     df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
     df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-    df['comments'] = df['comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+    #df['comments'] = df['comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
 
     filename = 'X.xlsx'
     df.to_excel(filename, index=False)
     print("File excel saved")
-scrape_comment()
+# scrape_comment()
 scrape_tweets(driver)
 driver.quit()
