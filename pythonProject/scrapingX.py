@@ -55,25 +55,7 @@ time.sleep(2)
 body = driver.find_element(By.TAG_NAME, "body")
 data_set = set()
 
-def scrap_comment(tweet):
-    comments = []
-    try:
-        # Nhấp vào nút bình luận để mở bình luận
-        tweet.find_element(By.XPATH, ".//button[@data-testid='reply']").click()
-        time.sleep(2)  # Chờ một chút để bình luận tải
-        # Lấy bình luận
-        comment_elements = driver.find_elements(By.XPATH, "//div[@data-testid='tweet']")
-        for comment in comment_elements[:5]:  # Lấy 5 bình luận đầu tiên
-            comment_text = comment.find_element(By.XPATH, ".//div[@data-testid='tweetText']").text
-            comments.append(comment_text)
 
-        # Đóng phần bình luận nếu cần
-        driver.back()
-        time.sleep(2)  # Chờ một chút để quay lại
-    except Exception as e:
-        print(f"Lỗi khi lấy bình luận: {e}")
-
-    return comments
 
 def scrape_tweets(driver):
     #Luu du luu kiem tra bai viet trung lap:
@@ -124,7 +106,6 @@ def scrape_tweets(driver):
             try:
                 images = article.find_elements(By.XPATH, ".//img[@alt='Image']")
                 tweetIMGs = [img.get_attribute('src') for img in images]
-                #tweetIMGs = article.find_element(By.XPATH, ".//img").get_attribute('src')
 
             except:
                 tweetIMGs = ''
@@ -156,7 +137,6 @@ def scrape_tweets(driver):
     df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
     df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-    #df['comments'] = df['comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
 
     filename = 'X.xlsx'
     df.to_excel(filename, index=False)
