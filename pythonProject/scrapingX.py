@@ -17,7 +17,14 @@ name = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
 name.click()
 
 time.sleep(2)
-
+try:
+    email = driver.find_element(By.XPATH, "//input[@name='text']")
+    email.send_keys("hnhp113114115@gmail.com")
+    tt = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
+    tt.click()
+except:
+    pass
+time.sleep(2)
 password = driver.find_element(By.XPATH, "//input[@name='password']")
 password.send_keys("phatho0317")
 pw = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
@@ -48,6 +55,8 @@ time.sleep(2)
 body = driver.find_element(By.TAG_NAME, "body")
 data_set = set()
 
+
+
 def scrape_tweets(driver):
     #Luu du luu kiem tra bai viet trung lap:
     userIDs = []
@@ -56,22 +65,22 @@ def scrape_tweets(driver):
     likes = []
     replys = []
     resports = []
-
-    #view=[]
-#tweetIMG=[]
+    views = []
+    tweetIMG=[]
+    # tweet_comments = []
     articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
     while True:
         for article in articles:
             try:
-                userID = article.find_element(By.XPATH,".//div[@data-testid='User-Name']").text
+                userID = article.find_element(By.XPATH, ".//div[@data-testid='User-Name']").text
             except:
                 userID = ''
             try:
-                timePost = driver.find_element(By.XPATH,".//time").get_attribute("datetime")
+                timePost = driver.find_element(By.XPATH, ".//time").get_attribute("datetime")
             except:
                 timePost = ''
             try:
-                tweetText = driver.find_element(By.XPATH,".//div[@data-testid='tweetText']").text
+                tweetText = driver.find_element(By.XPATH, ".//div[@data-testid='tweetText']").text
             except:
                 tweetText = ''
             try:
@@ -88,6 +97,18 @@ def scrape_tweets(driver):
             except:
                 resport = ''
 
+            try:
+                view = driver.find_element(By.XPATH, ".//a[contains(@aria-label,'views')]")
+                views_count = view.get_attribute('aria-label').split(' ')[0]
+            except:
+                views_count = ''
+
+            try:
+                images = article.find_elements(By.XPATH, ".//img[@alt='Image']")
+                tweetIMGs = [img.get_attribute('src') for img in images]
+
+            except:
+                tweetIMGs = ''
             #Kiểm tra xem tweet có trùng lặp không
             if tweetText not in tweetTexts:
                 data_set.add(tweetText)
@@ -97,20 +118,29 @@ def scrape_tweets(driver):
                 likes.append(like)
                 replys.append(reply)
                 resports.append(resport)
+                views.append(views_count)
+                tweetIMG.append(tweetIMGs)
+
+                # Lấy bình luận cho tweet này
+                # comments = scrape_comments(article)
+                # tweet_comments.append(comments)
         #Cuộn chậm
         driver.execute_script("window.scrollBy(0,1000);")
         time.sleep(3)
         #Lấy thêm tweets mới sau khi cuộn
         articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-        if len(set(tweetTexts)) >= 5:
+        if len(set(tweetTexts)) >= 10:
             break
             print(len(set(tweetTexts)))
 
 
-    df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports),
-                      columns=['userIDs','timePosts','tweetTexts','likes','replys','resports'])
+    df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
+                      columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
+    df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+
     filename = 'X.xlsx'
-    df.to_excel(filename)
+    df.to_excel(filename, index=False)
     print("File excel saved")
+# scrape_comment()
 scrape_tweets(driver)
 driver.quit()
