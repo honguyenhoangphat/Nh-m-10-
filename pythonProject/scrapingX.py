@@ -3,9 +3,23 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 
+# Đường dẫn đến file thực thi geckodriver
+gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
 
-driver = webdriver.Chrome()
+# Khởi tởi đối tượng dịch vụ với đường geckodriver
+ser = Service(gecko_path)
+
+# Tạo tùy chọn
+options = webdriver.firefox.options.Options();
+options.binary_location ="C:/Program Files/Mozilla Firefox/firefox.exe"
+# Thiết lập firefox chỉ hiện thị giao diện
+options.headless = False
+
+# Khởi tạo driver
+driver = webdriver.Firefox(options = options, service=ser)
 driver.get("https://x.com/i/flow/login")
 
 time.sleep(5)
@@ -13,21 +27,22 @@ time.sleep(5)
 #Đăng nhập
 username = driver.find_element(By.XPATH, "//input[@name='text']")
 username.send_keys("hnhp113")
-name = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
+time.sleep(1)
+name = driver.find_element(By.XPATH, "//span[contains(text(),'Tiếp theo')]")
 name.click()
 
 time.sleep(2)
 try:
     email = driver.find_element(By.XPATH, "//input[@name='text']")
     email.send_keys("hnhp113114115@gmail.com")
-    tt = driver.find_element(By.XPATH, "//span[contains(text(),'Next')]")
+    tt = driver.find_element(By.XPATH, "//span[contains(text(),'Tiếp theo')]")
     tt.click()
 except:
     pass
 time.sleep(2)
 password = driver.find_element(By.XPATH, "//input[@name='password']")
 password.send_keys("phatho0317")
-pw = driver.find_element(By.XPATH, "//span[contains(text(),'Log in')]")
+pw = driver.find_element(By.XPATH, "//span[contains(text(),'Đăng nhập')]")
 pw.click()
 
 time.sleep(5)
@@ -129,16 +144,16 @@ def scrape_tweets(driver):
         time.sleep(3)
         #Lấy thêm tweets mới sau khi cuộn
         articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-        if len(set(tweetTexts)) >= 10:
+        if len(set(tweetTexts)) >=100:
             break
-            print(len(set(tweetTexts)))
+        print(len(set(tweetTexts)))
 
 
     df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
     df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
 
-    filename = 'X.xlsx'
+    filename = 'abc.xlsx'
     df.to_excel(filename, index=False)
     print("File excel saved")
 # scrape_comment()
