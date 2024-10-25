@@ -13,13 +13,13 @@ gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
 ser = Service(gecko_path)
 
 # Tạo tùy chọn
-options = webdriver.firefox.options.Options();
+options = webdriver.firefox.options.Options()
 options.binary_location ="C:/Program Files/Mozilla Firefox/firefox.exe"
 # Thiết lập firefox chỉ hiện thị giao diện
 options.headless = False
 
 # Khởi tạo driver
-driver = webdriver.Firefox(options = options, service=ser)
+driver = webdriver.Firefox(options=options, service=ser)
 driver.get("https://x.com/i/flow/login")
 
 time.sleep(5)
@@ -141,10 +141,10 @@ def scrape_tweets(driver):
                 # tweet_comments.append(comments)
         #Cuộn chậm
         driver.execute_script("window.scrollBy(0,1000);")
-        time.sleep(3)
+        time.sleep(5)
         #Lấy thêm tweets mới sau khi cuộn
         articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-        if len(set(tweetTexts)) >=100:
+        if len(set(tweetTexts)) >= 100:
             break
         print(len(set(tweetTexts)))
 
