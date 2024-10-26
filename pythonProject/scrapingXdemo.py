@@ -6,9 +6,10 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from pymongo import MongoClient
+from selenium.webdriver.common.by import By
+import time
 
-
-#kết nối
+# #kết nối
 client = MongoClient("mongodb://localhost:27017/")
 client.drop_database('demo')
 db = client['demo']  # chon csdl Facebookdata1
@@ -78,6 +79,38 @@ time.sleep(2)
 body = driver.find_element(By.TAG_NAME, "body")
 data_set = set()
 
+# def scrape_comments(article):
+#     comments = []
+#
+#     # Nhấp vào bài viết để mở phần chi tiết, bao gồm cả các bình luận
+#     try:
+#         article.click()
+#         time.sleep(2)  # Đợi trang tải để có các bình luận
+#     except Exception as e:
+#         print(f"Lỗi khi nhấp vào bài viết: {e}")
+#         return comments  # Nếu không nhấp được thì trả về danh sách rỗng
+#
+#     # Tìm các bình luận sau khi nhấp vào bài viết
+#     comment_elements = article.find_elements(By.XPATH, ".//div[@data-testid='reply']")
+#     for comment in comment_elements[:10]:  # Giới hạn 10 bình luận đầu
+#         try:
+#             comment_text = comment.find_element(By.XPATH, ".//div[@data-testid='tweetText']").text
+#             comments.append(comment_text)
+#         except Exception as e:
+#             print(f"Lỗi khi lấy bình luận: {e}")
+#             comments.append("")  # Nếu không có nội dung, thêm bình luận trống
+#
+#     # Đóng lại bài viết sau khi lấy bình luận
+#     try:
+#         driver.find_element(By.XPATH, "//div[@aria-label='Close']").click()
+#         time.sleep(1)  # Đợi một chút để đảm bảo bài viết đóng hoàn toàn
+#     except Exception as e:
+#         print(f"Lỗi khi đóng bài viết: {e}")
+#
+#     return comments
+
+
+
 
 
 def scrape_tweets(driver):
@@ -133,7 +166,7 @@ def scrape_tweets(driver):
 
             except:
                 tweetIMGs = ''
-
+            # comments = scrape_comments(article)
                 # Tạo document dữ liệu để lưu trữ trong MongoDB
             document = {
                 "userID": userID,
@@ -158,12 +191,10 @@ def scrape_tweets(driver):
                 resports.append(resport)
                 views.append(views_count)
                 tweetIMG.append(tweetIMGs)
-
+                # tweet_comments.append(comments)
             collection.insert_one(document)
 
-                # Lấy bình luận cho tweet này
-                # comments = scrape_comments(article)
-                # tweet_comments.append(comments)
+
         #Cuộn chậm
         driver.execute_script("window.scrollBy(0,1000);")
         time.sleep(5)
@@ -172,15 +203,16 @@ def scrape_tweets(driver):
         if len(set(tweetTexts)) >= 10:
             break
         print(len(set(tweetTexts)))
-    print("Dữ liệu đã được lưu vào MongoDB.")
+        print("Dữ liệu đã được lưu vào MongoDB.")
 
-#     df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
-#                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
-#     df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-#
-#     filename = 'ab.xlsx'
-#     df.to_excel(filename, index=False)
-#     print("File excel saved")
-# # scrape_comment()
+    df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
+                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
+    # df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+    # # df['tweet_comments'] = df['tweet_comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+    #
+    # filename = 'ab.xlsx'
+    # df.to_excel(filename, index=False)
+    # print("File excel saved")
+# scrape_comment()
 scrape_tweets(driver)
 driver.quit()
