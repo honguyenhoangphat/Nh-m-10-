@@ -3,11 +3,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
-from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from pymongo import MongoClient
-from selenium.webdriver.common.by import By
-import time
 
 # #kết nối
 client = MongoClient("mongodb://localhost:27017/")
@@ -17,9 +14,7 @@ collection = db['tweets']
 
 # Đường dẫn đến file thực thi geckodriver
 gecko_path = r"D:/DoAnNhom10d/Nhom-10d/pythonProject/geckodriver.exe"
-
-# Khởi tởi đối tượng dịch vụ với đường geckodriver
-ser = Service(gecko_path)
+ser = Service(gecko_path) # Khởi tạo đối tượng dịch vụ với geckodriver
 
 # Tạo tùy chọn
 options = webdriver.firefox.options.Options()
@@ -41,6 +36,7 @@ name = driver.find_element(By.XPATH, "//span[contains(text(),'Tiếp theo')]")
 name.click()
 
 time.sleep(2)
+#Xác thực thông tin
 try:
     email = driver.find_element(By.XPATH, "//input[@name='text']")
     email.send_keys("hnhp113114115@gmail.com")
@@ -49,6 +45,7 @@ try:
 except:
     pass
 time.sleep(2)
+#Mật khẩu
 password = driver.find_element(By.XPATH, "//input[@name='password']")
 password.send_keys("phatho0317")
 pw = driver.find_element(By.XPATH, "//span[contains(text(),'Đăng nhập')]")
@@ -58,7 +55,7 @@ time.sleep(5)
 
 #Tìm trang cá nhân bạn muốn quét dữ liệu
 search = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-idol = "M-TP"
+idol = "Donald Trump"
 search.send_keys(idol)
 search.send_keys(Keys.ENTER)
 time.sleep(5)
@@ -73,10 +70,7 @@ name_idol = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/
 name_idol.click()
 time.sleep(2)
 
-#Tạo list để lưu dữ liệu
-
 #Tìm thẻ body để có thể cuộn trang
-body = driver.find_element(By.TAG_NAME, "body")
 data_set = set()
 
 # def scrape_comments(article):
@@ -124,7 +118,7 @@ def scrape_tweets(driver):
     resports = []
     views = []
     tweetIMG=[]
-    # tweet_comments = []
+
     articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
     while True:
         for article in articles:
