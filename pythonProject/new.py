@@ -6,11 +6,11 @@ import pandas as pd
 from selenium.webdriver.chrome.service import Service
 from pymongo import MongoClient
 
-#kết nối
-client = MongoClient("mongodb://localhost:27017/")
-client.drop_database('demo')
-db = client['demo']  # chon csdl Facebookdata1
-collection = db['tweets']
+# #kết nối
+# client = MongoClient("mongodb://localhost:27017/")
+# client.drop_database('demo')
+# db = client['demo']  # chon csdl Facebookdata1
+# collection = db['tweets']
 
 # Đường dẫn đến file thực thi geckodriver
 gecko_path = r"D:/DoAnNhom10d/Nhom-10d/pythonProject/geckodriver.exe"
@@ -55,7 +55,7 @@ time.sleep(5)
 
 #Tìm trang cá nhân bạn muốn quét dữ liệu
 search = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-idol = "M-TP"
+idol = "Donald Trump"
 search.send_keys(idol)
 search.send_keys(Keys.ENTER)
 time.sleep(5)
@@ -109,7 +109,7 @@ data_set = set()
 
 def scrape_tweets(driver):
     #Luu du luu kiem tra bai viet trung lap:
-    global document
+    global document, report
     userIDs = []
     timePosts = []
     tweetTexts = []  # = Post status
@@ -118,6 +118,7 @@ def scrape_tweets(driver):
     reposts = []
     views = []
     tweetIMG=[]
+    videos=[]
 
     articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
     while True:
@@ -155,30 +156,36 @@ def scrape_tweets(driver):
                 repost = ''
 
             try:
+
                 view = driver.find_element(By.XPATH, ".//a[contains(@aria-label,'views')]")
                 views_count = view.get_attribute('aria-label').split(' ')[0]
             except:
                 views_count = ''
 
             try:
-                images = article.find_elements(By.XPATH, ".//img[@alt='Image']")
+                try:
+                    videos = article.find_elements(By.XPATH, "")
+                except:
+                    pass
+
+                images = article.find_elements(By.XPATH, ".//source[@type='video/mp4']")
                 tweetIMGs = [img.get_attribute('src') for img in images]
 
             except:
                 tweetIMGs = ''
             # comments = scrape_comments(article)
                 # Tạo document dữ liệu để lưu trữ trong MongoDB
-            document = {
-                "userID": userID,
-                "timePost": timePost,
-                "tweetText": tweetText,
-                "like": like,
-                "reply": reply,
-                "repost": repost,
-                "views": views_count,
-                "tweetIMG": tweetIMGs
-
-            }
+            # document = {
+            #     "userID": userID,
+            #     "timePost": timePost,
+            #     "tweetText": tweetText,
+            #     "like": like,
+            #     "reply": reply,
+            #     "resport": resport,
+            #     "views": views_count,
+            #     "tweetIMG": tweetIMGs
+            #
+            # }
 
             #Kiểm tra xem tweet có trùng lặp không
             if tweetText not in tweetTexts:
@@ -192,55 +199,55 @@ def scrape_tweets(driver):
                 views.append(views_count)
                 tweetIMG.append(tweetIMGs)
                 # tweet_comments.append(comments)
-                collection.insert_one(document)
+                # collection.insert_one(document)
 
 
         #Cuộn chậm
-        driver.execute_script("window.scrollBy(0,1000);")
+        driver.execute_script("window.scrollBy(0,600);")
         time.sleep(5)
         #Lấy thêm tweets mới sau khi cuộn
         articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-        if len(set(tweetTexts)) >= 50:
+        if len(set(tweetTexts)) >= 5:
             break
         print(len(set(tweetTexts)))
-    print("Dữ liệu đã được lưu vào MongoDB.")
+    # print("Dữ liệu đã được lưu vào MongoDB.")
 
-    # df = pd.DataFrame(zip(userIDs, timePosts, tweetTexts, likes, replys, reposts, views, tweetIMG),
-    #                    columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'reposts', 'views', 'tweetIMG'])
-    # df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-    # # # df['tweet_comments'] = df['tweet_comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-    #
-    # filename = 'ab.xlsx'
-    # df.to_excel(filename, index=False)
-    # print("File excel saved")
+    df = pd.DataFrame(zip(userIDs, timePosts, tweetTexts, likes, replys, reposts, views, tweetIMG),
+                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'reposts', 'views', 'tweetIMG'])
+    df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+    # # df['tweet_comments'] = df['tweet_comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
+
+    filename = 'ab.xlsx'
+    df.to_excel(filename, index=False)
+    print("File excel saved")
 # scrape_comment()
 scrape_tweets(driver)
 driver.quit()
-def convert_numeric_fields(collection):
-    for document in collection.find():
-        update_needed = False
-        update_fields = {}
-
-        for field, value in document.items():
-            # Kiểm tra nếu giá trị là chuỗi và có thể chuyển đổi thành số
-            if isinstance(value, str) and value.isdigit():
-                update_fields[field] = int(value)  # Chuyển sang kiểu số nguyên
-                update_needed = True
-            elif isinstance(value, str):
-                try:
-                    # Cố gắng chuyển thành số thực nếu có thể
-                    num_value = float(value)
-                    update_fields[field] = num_value
-                    update_needed = True
-                except ValueError:
-                    continue  # Không phải kiểu số, bỏ qua
-
-        # Nếu có bất kỳ trường nào cần cập nhật, thực hiện cập nhật
-        if update_needed:
-            collection.update_one({'_id': document['_id']}, {'$set': update_fields})
-
-# Kết nối lại với cơ sở dữ liệu MongoDB và gọi hàm chuyển đổi
-convert_numeric_fields(collection)
-
-print("Đã chuyển đổi tất cả các trường từ chuỗi thành số thành công.")
-print('Tổng số tệp:', collection.count_documents({}))
+# def convert_numeric_fields(collection):
+#     for document in collection.find():
+#         update_needed = False
+#         update_fields = {}
+#
+#         for field, value in document.items():
+#             # Kiểm tra nếu giá trị là chuỗi và có thể chuyển đổi thành số
+#             if isinstance(value, str) and value.isdigit():
+#                 update_fields[field] = int(value)  # Chuyển sang kiểu số nguyên
+#                 update_needed = True
+#             elif isinstance(value, str):
+#                 try:
+#                     # Cố gắng chuyển thành số thực nếu có thể
+#                     num_value = float(value)
+#                     update_fields[field] = num_value
+#                     update_needed = True
+#                 except ValueError:
+#                     continue  # Không phải kiểu số, bỏ qua
+#
+#         # Nếu có bất kỳ trường nào cần cập nhật, thực hiện cập nhật
+#         if update_needed:
+#             collection.update_one({'_id': document['_id']}, {'$set': update_fields})
+#
+# # Kết nối lại với cơ sở dữ liệu MongoDB và gọi hàm chuyển đổi
+# convert_numeric_fields(collection)
+#
+# print("Đã chuyển đổi tất cả các trường từ chuỗi thành số thành công.")
+# #print('Tổng số tệp:', collection.count_documents({}))
