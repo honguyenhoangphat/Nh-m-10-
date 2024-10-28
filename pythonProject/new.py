@@ -51,11 +51,11 @@ password.send_keys("phatho0317")
 pw = driver.find_element(By.XPATH, "//span[contains(text(),'Đăng nhập')]")
 pw.click()
 
-time.sleep(5)
+time.sleep(10)
 
 #Tìm trang cá nhân bạn muốn quét dữ liệu
 search = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-idol = "Donald Trump"
+idol = "Oxford University"
 search.send_keys(idol)
 search.send_keys(Keys.ENTER)
 time.sleep(5)
@@ -118,7 +118,6 @@ def scrape_tweets(driver):
     reposts = []
     views = []
     tweetIMG=[]
-    videos=[]
 
     articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
     while True:
@@ -163,12 +162,7 @@ def scrape_tweets(driver):
                 views_count = ''
 
             try:
-                try:
-                    videos = article.find_elements(By.XPATH, "")
-                except:
-                    pass
-
-                images = article.find_elements(By.XPATH, ".//source[@type='video/mp4']")
+                images = article.find_elements(By.XPATH, ".//img[contains(@src=, 'https://pbs.twimg.com/card_img/')]")
                 tweetIMGs = [img.get_attribute('src') for img in images]
 
             except:
