@@ -103,18 +103,15 @@ def scrape_tweets(driver, max_tweets = 660):
             except:
                 tweetText = ''
             try:
-                # like = driver.find_element(By.XPATH, ".//button[@data-testid='like']").text
                 like_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'Likes')]")
                 like = like_count.get_attribute('aria-label').split(' ')[0]
             except:
                 like = ''
             try:
-                # reply = driver.find_element(By.XPATH, ".//button[@data-testid='reply']").text
                 reply_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'Replies')]")
                 reply = reply_count.get_attribute('aria-label').split(' ')[0]
             except:
                 reply = ''
-
             try:
                 # resport = driver.find_element(By.XPATH, ".//button[@data-testid='retweet']").text
                 repost_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'reposts')]")
@@ -123,17 +120,13 @@ def scrape_tweets(driver, max_tweets = 660):
                 repost = ''
 
             try:
-
                 view = driver.find_element(By.XPATH, ".//a[contains(@aria-label,'views')]")
                 views_count = view.get_attribute('aria-label').split(' ')[0]
             except:
                 views_count = ''
-
             try:
                 images = article.find_elements(By.XPATH, ".//img[contains(@src, 'https://pbs.twimg.com') and not (contains(@src, 'profile_images'))]")
-
                 tweetIMGs = [img.get_attribute('src') for img in images]
-
             except:
                 tweetIMGs = ''
 
@@ -174,9 +167,10 @@ def scrape_tweets(driver, max_tweets = 660):
         #Lấy thêm tweets mới sau khi cuộn
         print(len(set(tweetTexts)))
     print(f"Dữ liệu đã được lưu vào MongoDB. Đã cào được {count} bài")
-
 scrape_tweets(driver)
 driver.quit()
+
+
 def convert_numeric_fields(collection):
     for document in collection.find():
         update_needed = False
