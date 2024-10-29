@@ -8,12 +8,14 @@ from pymongo import MongoClient
 
 # #kết nối
 client = MongoClient("mongodb://localhost:27017/")
-#client.drop_database('Scraping')
+client.drop_database('Scraping')
 db = client['Scraping']  # chon csdl
 collection = db['Oxford_Uni']
 
 # Đường dẫn đến file thực thi geckodriver
-gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
+#gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
+gecko_path = r"D:/DoAnNhom10d/Nhom-10d/pythonProject/geckodriver.exe"
+
 ser = Service(gecko_path) # Khởi tạo đối tượng dịch vụ với geckodriver
 
 # Tạo tùy chọn
@@ -70,7 +72,7 @@ name_idol = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/
 name_idol.click()
 time.sleep(2)
 
-def scrape_tweets(driver, max_tweets = 20000):
+def scrape_tweets(driver, max_tweets = 6000):
     #Luu du luu kiem tra bai viet trung lap:
     global document
     data_set = set()
@@ -172,16 +174,16 @@ def scrape_tweets(driver, max_tweets = 20000):
         #Lấy thêm tweets mới sau khi cuộn
         print(len(set(tweetTexts)))
     print(f"Dữ liệu đã được lưu vào MongoDB. Đã cào được {count} bài")
-    #
+    # #
     # df = pd.DataFrame(zip(userIDs, timePosts, tweetTexts, likes, replys, reposts, views, tweetIMG),
     #                    columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'reposts', 'views', 'tweetIMG'])
     # df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
     # # df['tweet_comments'] = df['tweet_comments'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
-
-    # filename = 'testOX.xlsx'
+    #
+    # filename = 'testO.xlsx'
     # df.to_excel(filename, index=False)
     # print("File excel saved")
-#scrape_tweets(driver)
+scrape_tweets(driver)
 driver.quit()
 def convert_numeric_fields(collection):
     for document in collection.find():
@@ -210,4 +212,4 @@ def convert_numeric_fields(collection):
 convert_numeric_fields(collection)
 
 print("Đã chuyển đổi tất cả các trường từ chuỗi thành số thành công.")
-#print('Tổng số tệp:', collection.count_documents({}))
+# print('Tổng số tệp:', collection.count_documents({}))
