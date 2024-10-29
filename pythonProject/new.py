@@ -173,25 +173,18 @@ driver.quit()
 
 def convert_numeric_fields(collection):
     for document in collection.find():
-        update_needed = False
-        update_fields = {}
+        update_fields = dict()
 
         for field, value in document.items():
             # Kiểm tra nếu giá trị là chuỗi và có thể chuyển đổi thành số
-            if isinstance(value, str) and value.isdigit():
-                update_fields[field] = int(value)  # Chuyển sang kiểu số nguyên
-                update_needed = True
-            elif isinstance(value, str):
+            if isinstance(value, str):
                 try:
-                    # Cố gắng chuyển thành số thực nếu có thể
-                    num_value = float(value)
-                    update_fields[field] = num_value
-                    update_needed = True
-                except ValueError:
-                    continue  # Không phải kiểu số, bỏ qua
-
+                    num_value = int(value) if value.isdigit() else float(value)
+                    update_fields[field] = num_value #Cap nhat gia tri
+                except:
+                    continue
         # Nếu có bất kỳ trường nào cần cập nhật, thực hiện cập nhật
-        if update_needed:
+        if update_fields:
             collection.update_one({'_id': document['_id']}, {'$set': update_fields})
 
 # Kết nối lại với cơ sở dữ liệu MongoDB và gọi hàm chuyển đổi
