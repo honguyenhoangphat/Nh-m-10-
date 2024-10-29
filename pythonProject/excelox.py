@@ -3,20 +3,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 import pandas as pd
-from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from pymongo import MongoClient
+
+
 
 # Đường dẫn đến file thực thi geckodriver
-gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
+#gecko_path = r"D:/Nhom10/Nhom-10d/pythonProject/geckodriver.exe"
+gecko_path = r"D:/DoAnNhom10d/Nhom-10d/pythonProject/geckodriver.exe"
 
-# Khởi tởi đối tượng dịch vụ với đường geckodriver
-ser = Service(gecko_path)
+ser = Service(gecko_path) # Khởi tạo đối tượng dịch vụ với geckodriver
 
 # Tạo tùy chọn
 options = webdriver.firefox.options.Options()
 options.binary_location ="C:/Program Files/Mozilla Firefox/firefox.exe"
 # Thiết lập firefox chỉ hiện thị giao diện
-options.headless = False
+options.headless = True
 
 # Khởi tạo driver
 driver = webdriver.Firefox(options=options, service=ser)
@@ -32,6 +34,7 @@ name = driver.find_element(By.XPATH, "//span[contains(text(),'Tiếp theo')]")
 name.click()
 
 time.sleep(2)
+#Xác thực thông tin
 try:
     email = driver.find_element(By.XPATH, "//input[@name='text']")
     email.send_keys("hnhp113114115@gmail.com")
@@ -40,16 +43,17 @@ try:
 except:
     pass
 time.sleep(2)
+#Mật khẩu
 password = driver.find_element(By.XPATH, "//input[@name='password']")
 password.send_keys("phatho0317")
 pw = driver.find_element(By.XPATH, "//span[contains(text(),'Đăng nhập')]")
 pw.click()
 
-time.sleep(5)
+time.sleep(10)
 
 #Tìm trang cá nhân bạn muốn quét dữ liệu
 search = driver.find_element(By.XPATH, "//input[@data-testid='SearchBox_Search_Input']")
-idol = "M-TP"
+idol = "Oxford University"
 search.send_keys(idol)
 search.send_keys(Keys.ENTER)
 time.sleep(5)
@@ -64,27 +68,23 @@ name_idol = driver.find_element(By.XPATH, "//*[@id='react-root']/div/div/div[2]/
 name_idol.click()
 time.sleep(2)
 
-#Tạo list để lưu dữ liệu
-
-#Tìm thẻ body để có thể cuộn trang
-body = driver.find_element(By.TAG_NAME, "body")
-data_set = set()
-
-
-
-def scrape_tweets(driver):
+def scrape_tweets(driver, max_tweets = 6000):
     #Luu du luu kiem tra bai viet trung lap:
+    global document
+    data_set = set()
+    count = 0
+
     userIDs = []
     timePosts = []
     tweetTexts = []  # = Post status
     likes = []
     replys = []
-    resports = []
+    reposts = []
     views = []
     tweetIMG=[]
-    # tweet_comments = []
-    articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-    while True:
+
+    while count < max_tweets:
+        articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
         for article in articles:
             try:
                 userID = article.find_element(By.XPATH, ".//div[@data-testid='User-Name']").text
@@ -99,31 +99,43 @@ def scrape_tweets(driver):
             except:
                 tweetText = ''
             try:
-                like = driver.find_element(By.XPATH, ".//button[@data-testid='like']").text
+                # like = driver.find_element(By.XPATH, ".//button[@data-testid='like']").text
+                like_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'Likes')]")
+                like = like_count.get_attribute('aria-label').split(' ')[0]
             except:
                 like = ''
             try:
-                reply = driver.find_element(By.XPATH, ".//button[@data-testid='reply']").text
+                # reply = driver.find_element(By.XPATH, ".//button[@data-testid='reply']").text
+                reply_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'Replies')]")
+                reply = reply_count.get_attribute('aria-label').split(' ')[0]
             except:
                 reply = ''
 
             try:
-                resport = driver.find_element(By.XPATH, ".//button[@data-testid='retweet']").text
+                # resport = driver.find_element(By.XPATH, ".//button[@data-testid='retweet']").text
+                repost_count = driver.find_element(By.XPATH, ".//button[contains(@aria-label,'reposts')]")
+                repost = repost_count.get_attribute('aria-label').split(' ')[0]
             except:
-                resport = ''
+                repost = ''
 
             try:
+
                 view = driver.find_element(By.XPATH, ".//a[contains(@aria-label,'views')]")
                 views_count = view.get_attribute('aria-label').split(' ')[0]
             except:
                 views_count = ''
 
             try:
-                images = article.find_elements(By.XPATH, ".//img[@alt='Image']")
+                images = article.find_elements(By.XPATH, ".//img[contains(@src, 'https://pbs.twimg.com') and not (contains(@src, 'profile_images'))]")
+
                 tweetIMGs = [img.get_attribute('src') for img in images]
 
             except:
                 tweetIMGs = ''
+
+            # Tạo document dữ liệu để lưu trữ trong MongoDB
+
+
             #Kiểm tra xem tweet có trùng lặp không
             if tweetText not in tweetTexts:
                 data_set.add(tweetText)
@@ -132,30 +144,29 @@ def scrape_tweets(driver):
                 tweetTexts.append(tweetText)
                 likes.append(like)
                 replys.append(reply)
-                resports.append(resport)
+                reposts.append(repost)
                 views.append(views_count)
                 tweetIMG.append(tweetIMGs)
+                count += 1
 
-                # Lấy bình luận cho tweet này
-                # comments = scrape_comments(article)
-                # tweet_comments.append(comments)
+                if count > max_tweets:
+                    break
+
+
         #Cuộn chậm
-        driver.execute_script("window.scrollBy(0,1000);")
-        time.sleep(5)
+        driver.execute_script("window.scrollBy(0,600);")
+        time.sleep(3)
         #Lấy thêm tweets mới sau khi cuộn
-        articles = driver.find_elements(By.XPATH, "//article[@data-testid='tweet']")
-        if len(set(tweetTexts)) >= 100:
-            break
         print(len(set(tweetTexts)))
-
-
-    df = pd.DataFrame(zip(userIDs,timePosts,tweetTexts,likes,replys,resports, views, tweetIMG),
-                      columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'resports', 'views', 'tweetIMG'])
+    print(f"Dữ liệu đã được lưu vào MongoDB. Đã cào được {count} bài")
+    #
+    df = pd.DataFrame(zip(userIDs, timePosts, tweetTexts, likes, replys, reposts, views, tweetIMG),
+                       columns=['userIDs', 'timePosts', 'tweetTexts', 'likes', 'replys', 'reposts', 'views', 'tweetIMG'])
     df['tweetIMG'] = df['tweetIMG'].apply(lambda x: ', '.join(x) if isinstance(x, list) else x)
 
-    filename = 'abc.xlsx'
+
+    filename = 'testOxford.xlsx'
     df.to_excel(filename, index=False)
     print("File excel saved")
-# scrape_comment()
 scrape_tweets(driver)
 driver.quit()
